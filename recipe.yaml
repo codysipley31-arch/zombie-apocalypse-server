@@ -1,11 +1,8 @@
 # ---------------------------------------------------------------------------
 # The Walking Dead - Lightweight Zombie Apocalypse (QBCore + ox stack)
 #
-# BEFORE DEPLOYING
-#   1. Upload this whole folder (resources/, sql/, recipe.yaml, README.md) to a
-#      GitHub repository you control.
-#   2. Change the one line below marked  <-- EDIT ME  to point at that repo.
-#   3. In txAdmin choose Recipe > Custom/Local and paste this file, or host it.
+# Deploy from txAdmin using this repository's raw recipe URL:
+# https://raw.githubusercontent.com/codysipley31-arch/zombie-apocalypse-server/main/recipe.yaml
 # ---------------------------------------------------------------------------
 name: The Walking Dead - Zombie Apocalypse
 version: 1.0.0
@@ -62,20 +59,160 @@ tasks:
     src: ./tmp/illenium-appearance.zip
     dest: ./resources/[appearance]
 
-  # --- Custom zombie + survival resources (this package) ---
+  # --- Download this repository's source files ---
   - action: download_github
-    src: https://github.com/YOUR_GITHUB_USERNAME/zombie-apocalypse-server   # <-- EDIT ME
+    src: https://github.com/codysipley31-arch/zombie-apocalypse-server
     ref: main
     dest: ./tmp/zws
 
+  # The repository stores source files at its root. Assemble them into FiveM resources.
+  - action: ensure_dir
+    path: ./resources/[zombie]/zombie-ai/client
+  - action: ensure_dir
+    path: ./resources/[zombie]/zombie-ai/server
+  - action: ensure_dir
+    path: ./resources/[zombie]/zombie-hordes
+  - action: ensure_dir
+    path: ./resources/[zombie]/zombie-infection
+  - action: ensure_dir
+    path: ./resources/[survival]/survival-needs/data
+  - action: ensure_dir
+    path: ./resources/[survival]/survival-looting/client
+  - action: ensure_dir
+    path: ./resources/[survival]/survival-looting/server
+  - action: ensure_dir
+    path: ./resources/[survival]/survival-crafting
+  - action: ensure_dir
+    path: ./resources/[survival]/survival-basebuilding
+  - action: ensure_dir
+    path: ./resources/[survival]/survival-start
+
+  # --- zombie-ai ---
   - action: copy_path
-    src: ./tmp/zws/resources/[zombie]
-    dest: ./resources/[zombie]
-    overwrite: true
+    src: "./tmp/zws/fxmanifest (17).lua"
+    dest: ./resources/[zombie]/zombie-ai/fxmanifest.lua
   - action: copy_path
-    src: ./tmp/zws/resources/[survival]
-    dest: ./resources/[survival]
-    overwrite: true
+    src: "./tmp/zws/config (16).lua"
+    dest: ./resources/[zombie]/zombie-ai/config.lua
+  - action: copy_path
+    src: ./tmp/zws/shared.lua
+    dest: ./resources/[zombie]/zombie-ai/shared.lua
+  - action: copy_path
+    src: ./tmp/zws/zombies.lua
+    dest: ./resources/[zombie]/zombie-ai/client/zombies.lua
+  - action: copy_path
+    src: ./tmp/zws/world.lua
+    dest: ./resources/[zombie]/zombie-ai/client/world.lua
+  - action: copy_path
+    src: "./tmp/zws/main (15).lua"
+    dest: ./resources/[zombie]/zombie-ai/server/main.lua
+
+  # --- zombie-hordes ---
+  - action: copy_path
+    src: "./tmp/zws/fxmanifest (23).lua"
+    dest: ./resources/[zombie]/zombie-hordes/fxmanifest.lua
+  - action: copy_path
+    src: "./tmp/zws/config (22).lua"
+    dest: ./resources/[zombie]/zombie-hordes/config.lua
+  - action: copy_path
+    src: "./tmp/zws/client (24).lua"
+    dest: ./resources/[zombie]/zombie-hordes/client.lua
+  - action: copy_path
+    src: "./tmp/zws/server (25).lua"
+    dest: ./resources/[zombie]/zombie-hordes/server.lua
+
+  # --- zombie-infection ---
+  - action: copy_path
+    src: "./tmp/zws/fxmanifest (19).lua"
+    dest: ./resources/[zombie]/zombie-infection/fxmanifest.lua
+  - action: copy_path
+    src: "./tmp/zws/config (18).lua"
+    dest: ./resources/[zombie]/zombie-infection/config.lua
+  - action: copy_path
+    src: "./tmp/zws/client (20).lua"
+    dest: ./resources/[zombie]/zombie-infection/client.lua
+  - action: copy_path
+    src: "./tmp/zws/server (21).lua"
+    dest: ./resources/[zombie]/zombie-infection/server.lua
+
+  # --- survival-needs ---
+  - action: copy_path
+    src: "./tmp/zws/fxmanifest (8).lua"
+    dest: ./resources/[survival]/survival-needs/fxmanifest.lua
+  - action: copy_path
+    src: "./tmp/zws/config (7).lua"
+    dest: ./resources/[survival]/survival-needs/config.lua
+  - action: copy_path
+    src: "./tmp/zws/client (9).lua"
+    dest: ./resources/[survival]/survival-needs/client.lua
+  - action: copy_path
+    src: "./tmp/zws/server (10).lua"
+    dest: ./resources/[survival]/survival-needs/server.lua
+  - action: copy_path
+    src: ./tmp/zws/items.lua
+    dest: ./resources/[survival]/survival-needs/data/items.lua
+
+  # --- survival-looting ---
+  - action: copy_path
+    src: "./tmp/zws/fxmanifest (2).lua"
+    dest: ./resources/[survival]/survival-looting/fxmanifest.lua
+  - action: copy_path
+    src: "./tmp/zws/config (1).lua"
+    dest: ./resources/[survival]/survival-looting/config.lua
+  - action: copy_path
+    src: ./tmp/zws/looting.lua
+    dest: ./resources/[survival]/survival-looting/client/looting.lua
+  - action: copy_path
+    src: ./tmp/zws/vehicles.lua
+    dest: ./resources/[survival]/survival-looting/client/vehicles.lua
+  - action: copy_path
+    src: ./tmp/zws/airdrops.lua
+    dest: ./resources/[survival]/survival-looting/client/airdrops.lua
+  - action: copy_path
+    src: ./tmp/zws/main.lua
+    dest: ./resources/[survival]/survival-looting/server/main.lua
+
+  # --- survival-crafting ---
+  - action: copy_path
+    src: "./tmp/zws/fxmanifest (4).lua"
+    dest: ./resources/[survival]/survival-crafting/fxmanifest.lua
+  - action: copy_path
+    src: "./tmp/zws/config (3).lua"
+    dest: ./resources/[survival]/survival-crafting/config.lua
+  - action: copy_path
+    src: "./tmp/zws/client (5).lua"
+    dest: ./resources/[survival]/survival-crafting/client.lua
+  - action: copy_path
+    src: "./tmp/zws/server (6).lua"
+    dest: ./resources/[survival]/survival-crafting/server.lua
+
+  # --- survival-basebuilding ---
+  - action: copy_path
+    src: ./tmp/zws/fxmanifest.lua
+    dest: ./resources/[survival]/survival-basebuilding/fxmanifest.lua
+  - action: copy_path
+    src: ./tmp/zws/config.lua
+    dest: ./resources/[survival]/survival-basebuilding/config.lua
+  - action: copy_path
+    src: ./tmp/zws/client.lua
+    dest: ./resources/[survival]/survival-basebuilding/client.lua
+  - action: copy_path
+    src: ./tmp/zws/server.lua
+    dest: ./resources/[survival]/survival-basebuilding/server.lua
+
+  # --- survival-start ---
+  - action: copy_path
+    src: "./tmp/zws/fxmanifest (12).lua"
+    dest: ./resources/[survival]/survival-start/fxmanifest.lua
+  - action: copy_path
+    src: "./tmp/zws/config (11).lua"
+    dest: ./resources/[survival]/survival-start/config.lua
+  - action: copy_path
+    src: "./tmp/zws/client (13).lua"
+    dest: ./resources/[survival]/survival-start/client.lua
+  - action: copy_path
+    src: "./tmp/zws/server (14).lua"
+    dest: ./resources/[survival]/survival-start/server.lua
 
   # --- Merge our items into ox_inventory without editing its item list by hand ---
   - action: copy_path
@@ -98,7 +235,7 @@ tasks:
   # --- Database ---
   - action: connect_database
   - action: query_database
-    file: ./tmp/zws/sql/survival.sql
+    file: ./tmp/zws/survival.sql
 
   # --- server.cfg ---
   - action: write_file
@@ -120,7 +257,7 @@ tasks:
       sv_scriptHookAllowed 0
 
       # Database (oxmysql)
-      set mysql_connection_string "mysql://{{dbUsername}}:{{dbPassword}}@{{dbHost}}/{{dbName}}?charset=utf8mb4"
+      set mysql_connection_string "{{dbConnectionString}}"
       set mysql_ui false
 
       # ox_lib / ox_inventory

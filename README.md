@@ -25,14 +25,14 @@ Folder layout matches your plan, with `[survival]/survival-start` added.
 ## Install
 
 ### Option A: txAdmin recipe
-1. Upload this folder to a GitHub repo.
-2. In `recipe.yaml`, replace `YOUR_GITHUB_USERNAME` with your repo path (the line marked `EDIT ME`).
-3. Deploy in txAdmin with a custom recipe. It downloads the ox stack, QBCore, qb-target, illenium-appearance, your custom resources, merges the items into ox_inventory, creates the tables and writes `server.cfg`.
+1. In txAdmin, open **Recipe Deployer** and choose **Remote URL**.
+2. Enter `https://raw.githubusercontent.com/codysipley31-arch/zombie-apocalypse-server/main/recipe.yaml`.
+3. Follow the prompts for your server license key and database. The recipe downloads the dependencies, assembles the resources from the Lua files in this repository, merges the custom items, imports the SQL tables and writes `server.cfg`.
 
 ### Option B: manual
 1. Install `oxmysql`, `ox_lib`, `ox_inventory` (release builds), `qb-core`, `qb-target`, `illenium-appearance` and the default Cfx resources.
-2. Copy `resources/[zombie]` and `resources/[survival]` into your `resources` folder.
-3. Run `sql/survival.sql` on your database.
+2. Create and populate the resource folders using the file mappings in `recipe.yaml` (the source Lua files are stored at the repository root).
+3. Run `survival.sql` on your database.
 4. Merge items: rename `ox_inventory/data/items.lua` to `items_base.lua`, then create a new `items.lua` containing:
    ```lua
    local items = lib.load('data.items_base')
