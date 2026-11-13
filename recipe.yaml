@@ -1,0 +1,178 @@
+# ---------------------------------------------------------------------------
+# The Walking Dead - Lightweight Zombie Apocalypse (QBCore + ox stack)
+#
+# BEFORE DEPLOYING
+#   1. Upload this whole folder (resources/, sql/, recipe.yaml, README.md) to a
+#      GitHub repository you control.
+#   2. Change the one line below marked  <-- EDIT ME  to point at that repo.
+#   3. In txAdmin choose Recipe > Custom/Local and paste this file, or host it.
+# ---------------------------------------------------------------------------
+name: The Walking Dead - Zombie Apocalypse
+version: 1.0.0
+author: Cody
+description: Lightweight Walking Dead style survival server. QBCore, ox_inventory, custom zombie AI, infection, looting, crafting and base building. No police, EMS, jobs or dealerships.
+
+$engine: 3
+$onesync: on
+$steamRequired: false
+
+tasks:
+  # --- Cfx default resources (spawnmanager, chat, mapmanager, sessionmanager, baseevents) ---
+  - action: download_github
+    src: https://github.com/citizenfx/cfx-server-data
+    ref: master
+    subpath: resources
+    dest: ./resources
+
+  # --- ox stack (release builds include the compiled web UIs) ---
+  - action: download_file
+    url: https://github.com/overextended/oxmysql/releases/latest/download/oxmysql.zip
+    path: ./tmp/oxmysql.zip
+  - action: unzip
+    src: ./tmp/oxmysql.zip
+    dest: ./resources/[ox]
+
+  - action: download_file
+    url: https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip
+    path: ./tmp/ox_lib.zip
+  - action: unzip
+    src: ./tmp/ox_lib.zip
+    dest: ./resources/[ox]
+
+  - action: download_file
+    url: https://github.com/overextended/ox_inventory/releases/latest/download/ox_inventory.zip
+    path: ./tmp/ox_inventory.zip
+  - action: unzip
+    src: ./tmp/ox_inventory.zip
+    dest: ./resources/[ox]
+
+  # --- QBCore ---
+  - action: download_github
+    src: https://github.com/qbcore-framework/qb-core
+    dest: ./resources/[qb]/qb-core
+  - action: download_github
+    src: https://github.com/qbcore-framework/qb-target
+    dest: ./resources/[qb]/qb-target
+
+  # --- Appearance ---
+  - action: download_file
+    url: https://github.com/iLLeniumStudios/illenium-appearance/releases/latest/download/illenium-appearance.zip
+    path: ./tmp/illenium-appearance.zip
+  - action: unzip
+    src: ./tmp/illenium-appearance.zip
+    dest: ./resources/[appearance]
+
+  # --- Custom zombie + survival resources (this package) ---
+  - action: download_github
+    src: https://github.com/YOUR_GITHUB_USERNAME/zombie-apocalypse-server   # <-- EDIT ME
+    ref: main
+    dest: ./tmp/zws
+
+  - action: copy_path
+    src: ./tmp/zws/resources/[zombie]
+    dest: ./resources/[zombie]
+    overwrite: true
+  - action: copy_path
+    src: ./tmp/zws/resources/[survival]
+    dest: ./resources/[survival]
+    overwrite: true
+
+  # --- Merge our items into ox_inventory without editing its item list by hand ---
+  - action: copy_path
+    src: ./resources/[ox]/ox_inventory/data/items.lua
+    dest: ./resources/[ox]/ox_inventory/data/items_base.lua
+    overwrite: true
+  - action: write_file
+    file: ./resources/[ox]/ox_inventory/data/items.lua
+    data: |
+      local items = lib.load('data.items_base')
+      local chunk = LoadResourceFile('survival-needs', 'data/items.lua')
+      if chunk then
+          local extra = load(chunk, '@survival-needs/data/items.lua', 't', {})()
+          for name, def in pairs(extra) do items[name] = def end
+      else
+          print('^1[recipe] survival-needs/data/items.lua not found, custom items missing^0')
+      end
+      return items
+
+  # --- Database ---
+  - action: connect_database
+  - action: query_database
+    file: ./tmp/zws/sql/survival.sql
+
+  # --- server.cfg ---
+  - action: write_file
+    file: ./server.cfg
+    data: |
+      {{serverEndpoints}}
+
+      sv_hostname "{{serverName}}"
+      sets sv_projectName "The Walking Dead"
+      sets sv_projectDesc "Scavenge. Build. Survive the night."
+      sets tags "zombie, survival, walking dead, pve, qbcore, base building"
+      sets locale "en-US"
+
+      sv_licenseKey "{{svLicense}}"
+      sv_maxclients {{maxClients}}
+      set steam_webApiKey ""
+      sv_enforceGameBuild 3258
+      set onesync on
+      sv_scriptHookAllowed 0
+
+      # Database (oxmysql)
+      set mysql_connection_string "mysql://{{dbUsername}}:{{dbPassword}}@{{dbHost}}/{{dbName}}?charset=utf8mb4"
+      set mysql_ui false
+
+      # ox_lib / ox_inventory
+      setr ox:locale "en"
+      setr inventory:framework "qb"
+      setr inventory:slots 40
+      setr inventory:weight 30000
+      setr inventory:autoreload true
+
+      # Permissions
+      add_ace resource.qb-core command allow
+      add_ace qbcore.god command allow
+      add_principal qbcore.god group.admin
+      add_principal qbcore.god qbcore.admin
+      add_principal qbcore.admin qbcore.mod
+      add_ace group.admin command allow
+      add_ace group.admin command.quit deny
+
+      add_ace resource.ox_lib command.add_ace allow
+      add_ace resource.ox_lib command.remove_ace allow
+      add_ace resource.ox_lib command.add_principal allow
+      add_ace resource.ox_lib command.remove_principal allow
+
+      # Give yourself admin: replace with your own identifier (shown in txAdmin > Players)
+      # add_principal identifier.license:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX qbcore.god
+
+      # ---- Default resources ----
+      ensure mapmanager
+      ensure chat
+      ensure spawnmanager
+      ensure sessionmanager
+      ensure baseevents
+
+      # ---- Core (order matters) ----
+      ensure oxmysql
+      ensure ox_lib
+      ensure qb-core
+      ensure ox_inventory
+      ensure qb-target
+      ensure illenium-appearance
+
+      # ---- Zombies ----
+      ensure zombie-ai
+      ensure zombie-hordes
+      ensure zombie-infection
+
+      # ---- Survival ----
+      ensure survival-needs
+      ensure survival-looting
+      ensure survival-crafting
+      ensure survival-basebuilding
+      ensure survival-start
+
+  - action: remove_path
+    path: ./tmp
